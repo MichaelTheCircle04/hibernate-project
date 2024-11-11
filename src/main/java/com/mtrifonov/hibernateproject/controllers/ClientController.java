@@ -4,25 +4,20 @@ import com.mtrifonov.hibernateproject.assemblers.BrandModelAssembler;
 import com.mtrifonov.hibernateproject.assemblers.CarModelAssembler;
 import com.mtrifonov.hibernateproject.assemblers.DataExtractor;
 import com.mtrifonov.hibernateproject.assemblers.ModelModelAssembler;
-import com.mtrifonov.hibernateproject.entities.Brand;
 import com.mtrifonov.hibernateproject.entities.Car;
-import com.mtrifonov.hibernateproject.entities.Model;
 import com.mtrifonov.hibernateproject.repositories.BrandRepository;
 import com.mtrifonov.hibernateproject.repositories.CarRepository;
 import com.mtrifonov.hibernateproject.repositories.ModelRepository;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
-import java.util.function.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,24 +55,24 @@ public class ClientController {
         this.cma = cma;
         this.extractor = extractor;
     }
-    //done
+
     @GetMapping("/brands")
     public CollectionModel<EntityModel<Map<String, Object>>> allBrands() {        
         return CollectionModel.of(brandRepo.findAll().stream().map(bma::toModel).toList());
     }
-    //done
+
     @GetMapping("/models")
     public CollectionModel<EntityModel<Map<String, Object>>> allModels() {
         return CollectionModel.of(modelRepo.findAll().stream().map(mma::toModel).toList());
     }
-    //done
+
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> allCars() {
         List<Map<String, Object>> result = new ArrayList<>();
         carRepo.findAllWithStatus(1).forEach(c -> result.add(extractor.extractData(c)));
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result);
     }
-    //done
+
     @GetMapping("/by/brand")
     public CollectionModel<EntityModel<Map<String, Object>>> allCarsByBrand(@RequestParam(name = "brands") String[] args) {
         BiFunction<List, Set, List> func = (l, s) -> {
@@ -97,42 +92,14 @@ public class ClientController {
             return models;
         }).reduce(new ArrayList(), func, operator));
     }
-    //done
+    
+    @GetMapping("/by/model")
+    public CollectionModel<EntityModel<Map<String, Object>>> allCarsByModel(@RequestParam(name="models") String[] args) {
+        return CollectionModel.of(modelRepo.findWithDependencies(args[0]).getCars().stream().map(cma::toModel).toList());
+    }
+    
     @GetMapping("/{id}")
     public EntityModel<Map<String, Object>> carById(@PathVariable int id) {
         return cma.toModel(carRepo.findById(id));
     }
-
-    
-    /*private List<Car> template(Predicate<Car> pred) {
-        return carRepo.findAllWithStatus(1).stream().filter(pred).toList();
-    }
-    
-    @GetMapping("/by/brand")
-    public CollectionModel<Car> allCarsByBrand(@RequestParam(name="brands") String[] args) {
-        Predicate<Car> pred = car -> {
-            for (String brand : args) {
-                if (brand.equals(car.getModel().getBrand().getNameBrand())) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        return CollectionModel.of(template(pred), linkTo(methodOn(ClientController.class).allCars()).withRel("cars"));
-    }
-    
-    @GetMapping("/by/model")
-    public CollectionModel<Car> allCarsByModel(@RequestParam(name="models") String[] args) {
-        Predicate<Car> pred = car -> {
-            for (String model : args) {
-                if (model.equals(car.getModel().getNameModel())) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        return CollectionModel.of(template(pred), linkTo(methodOn(ClientController.class).allCars()).withRel("cars"));
-    }*/
 }
