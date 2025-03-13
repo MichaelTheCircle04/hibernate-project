@@ -17,11 +17,11 @@ public class BrandModelAssembler implements RepresentationModelAssembler<BrandDT
     @Override
     public EntityModel<BrandDTO> toModel(BrandDTO b) {
 
-        var tmp1 = UriTemplate.of("http://localhost:8080/shop/by/brand{?brands}"); //на все автомобили этой марки
+        var tmp1 = UriTemplate.of("http://localhost:8080/shop/by/brand{id}"); //на все автомобили этой марки
         var tmp2 = UriTemplate.of("http://localhost:8080/shop/models/by/brand/{id}"); //на все все модели этой марки
 
         return EntityModel.of(b, 
-                Link.of(tmp1, "All " + b.getName() + " cars: ").expand(b.getName()),
+                Link.of(tmp1, "All " + b.getName() + " cars: ").expand(b.getId()),
                 Link.of(tmp2, "All " + b.getName() + " models: ").expand(b.getId())
             );
     }   
