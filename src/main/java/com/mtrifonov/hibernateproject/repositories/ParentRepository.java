@@ -8,9 +8,6 @@ import java.util.List;
  * @param <T>
  */
 public interface ParentRepository<T> {
-    long count();
-    void save(T t);
-    void delete(T t);
     void deleteById(int id);
     T findById(int id);
     List<T> findAll();

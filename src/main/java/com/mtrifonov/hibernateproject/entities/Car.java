@@ -33,7 +33,7 @@ public class Car implements ParentEntity {
     
     @Id 
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="shop_seq")
-    @SequenceGenerator(name="shop_seq", sequenceName="shop_car_id_seq", allocationSize = 1)
+    @SequenceGenerator(name="shop_seq", sequenceName="shop_car_id_seq", allocationSize = 50)
     @Column(name = "car_id")
     private int id; 
     

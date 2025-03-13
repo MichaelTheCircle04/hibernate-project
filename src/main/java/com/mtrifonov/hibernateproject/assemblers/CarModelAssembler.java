@@ -1,8 +1,6 @@
 package com.mtrifonov.hibernateproject.assemblers;
 
-import com.mtrifonov.hibernateproject.entities.Car;
-import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mtrifonov.hibernateproject.dtos.CarDTO;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.UriTemplate;
@@ -14,25 +12,19 @@ import org.springframework.stereotype.Component;
  * @Mikhail Trifonov
  */
 @Component
-public class CarModelAssembler implements RepresentationModelAssembler<Car, EntityModel<Map<String, Object>>> {
-    
-    private final DataExtractor extractor;
-
-    @Autowired
-    public CarModelAssembler(DataExtractor extractor) {
-        this.extractor = extractor;
-    }
+public class CarModelAssembler implements RepresentationModelAssembler<CarDTO, EntityModel<CarDTO>> {
     
     @Override
-    public EntityModel<Map<String, Object>> toModel(Car entity) {
-        UriTemplate tmp1 = UriTemplate.of("http://localhost:8080/shop/by/model{?models}");
-        UriTemplate tmp2 = UriTemplate.of("http://localhost:8080/shop/by/brand{?brand}");
-        UriTemplate tmp3 = UriTemplate.of("http://localhost:8080/shop/{?id}");
-        Map<String, Object> data = extractor.extractData(entity);
-        return EntityModel.of(data, 
-                Link.of(tmp1, "All " + data.get("nameModel")).expand(data.get("nameModel")),
-                Link.of(tmp2, "All " + data.get("nameBrand")).expand(data.get("nameBrand")),
-                Link.of(tmp3, "This car: ").expand(data.get("id")));
-    }
-    
+    public EntityModel<CarDTO> toModel(CarDTO c) {
+
+        var tmp1 = UriTemplate.of("http://localhost:8080/shop/models/{id}"); //на модель
+        var tmp2 = UriTemplate.of("http://localhost:8080/shop/brands/{id}"); //на марку
+        var tmp3 = UriTemplate.of("http://localhost:8080/shop/{id}"); //на себя
+
+        return EntityModel.of(c, 
+                Link.of(tmp1, c.getModel() + ": ").expand(c.getModelId()),
+                Link.of(tmp2, c.getBrand() + ": ").expand(c.getBrandId()),
+                Link.of(tmp3, "This car: ").expand(c.getId())
+            );
+    } 
 }

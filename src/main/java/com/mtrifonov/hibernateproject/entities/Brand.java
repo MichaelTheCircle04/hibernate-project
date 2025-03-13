@@ -27,9 +27,13 @@ import lombok.ToString;
 @ToString(exclude = {"models"})
 public class Brand implements ParentEntity {
     
+    public Brand(String nameBrand) {
+        this.nameBrand = nameBrand;
+    }
+
     @Id 
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="brand_seq")
-    @SequenceGenerator(name="brand_seq", sequenceName="brands_brand_id_seq", allocationSize = 1)
+    @SequenceGenerator(name="brand_seq", sequenceName="brands_brand_id_seq", allocationSize = 50)
     @Column(name = "brand_id")
     private int id;
     
@@ -38,8 +42,4 @@ public class Brand implements ParentEntity {
     
     @OneToMany(mappedBy = "brand", cascade = CascadeType.REMOVE)
     private Set<Model> models;
-
-    public Brand(String nameBrand) {
-        this.nameBrand = nameBrand;
-    }
 }

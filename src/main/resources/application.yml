@@ -1,7 +1,10 @@
-files:
-    cars: C:\\Users\\1\\Desktop\\cars.txt
-    models: C:\\Users\\1\\Desktop\\models.txt
-    brands: C:\\Users\\1\\Desktop\\brands.txt
-
-hibernate:
-    configuration: src/main/resources/postgresql.yml
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost/shop
+        username: postgres
+        password: postgres
+        driver: org.postgresql.Driver
+    flyway:
+        enabled: true
+        baseline-on-migrate: true
+        locations: classpath:db/migration/pg

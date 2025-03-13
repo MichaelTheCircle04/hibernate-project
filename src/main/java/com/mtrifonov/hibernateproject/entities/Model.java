@@ -34,7 +34,7 @@ public class Model implements ParentEntity {
     
     @Id 
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="model_seq")
-    @SequenceGenerator(name="model_seq", sequenceName="models_model_id_seq", allocationSize = 1) 
+    @SequenceGenerator(name="model_seq", sequenceName="models_model_id_seq", allocationSize = 50) 
     @Column(name = "model_id")
     private int id;
     

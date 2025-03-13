@@ -1,8 +1,6 @@
 package com.mtrifonov.hibernateproject.assemblers;
 
-import com.mtrifonov.hibernateproject.entities.Model;
-import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.mtrifonov.hibernateproject.dtos.ModelDTO;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.UriTemplate;
@@ -14,21 +12,17 @@ import org.springframework.stereotype.Component;
  * @Mikhail Trifonov
  */
 @Component
-public class ModelModelAssembler implements RepresentationModelAssembler <Model, EntityModel<Map<String, Object>>> {
-
-    private final DataExtractor extractor;
-
-    @Autowired
-    public ModelModelAssembler(DataExtractor extractor) {
-        this.extractor = extractor;
-    }
+public class ModelModelAssembler implements RepresentationModelAssembler <ModelDTO, EntityModel<ModelDTO>> {
       
     @Override
-    public EntityModel<Map<String, Object>> toModel(Model entity) {
-        UriTemplate tmp = UriTemplate.of("http://localhost:8080/shop/by/model{?models}");
-        Map<String, Object> data = extractor.extractData(entity);
-        return EntityModel.of(data, 
-                Link.of(tmp, "All " + data.get("nameModel")).expand(data.get("nameModel")));
+    public EntityModel<ModelDTO> toModel(ModelDTO m) {
+
+        var tmp1 = UriTemplate.of("http://localhost:8080/shop/by/model{?models}"); //на все автомобили этой модели
+        var tmp2 = UriTemplate.of("http://localhost:8080/shop/brands/{id}"); //на марку этой модели
+
+        return EntityModel.of(m, 
+                Link.of(tmp1, "All " + m.getName() + " cars: ").expand(m.getName()),
+                Link.of(tmp2, m.getBrand() + ": ").expand(m.getBrandId())
+            );
     }
-    
 }

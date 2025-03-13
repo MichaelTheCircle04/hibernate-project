@@ -1,9 +1,10 @@
 package com.mtrifonov.hibernateproject.repositories;
 
 import com.mtrifonov.hibernateproject.entities.Car;
+import com.mtrifonov.hibernateproject.sql.SqlPreparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,61 +12,33 @@ import org.springframework.stereotype.Repository;
  * @Mikhail Trifonov
  */
 @Repository
-public class CarRepository extends ParentRepositoryImpl<Car> {
+public class CarRepository extends AbstractRepository<Car> {
     
-    @Autowired
     public CarRepository(SessionFactory factory) {
         super(factory, Car.class);
     }
     
-    public List<Car> findAllWithStatus(int statusId) {
-        String sql = """
-                    FROM Car c
-                    JOIN FETCH c.model m 
-                    JOIN FETCH m.brand b 
-                    JOIN FETCH c.status s
-                    WHERE s.id = :statusId
-                    """;
-        
-        try (var session = factory.openSession()) {
-            session.beginTransaction();
-            List<Car> cars = session.createQuery(sql, Car.class).setParameter("statusId", statusId).list();
-            session.getTransaction().commit();
-            return cars;
-        }
+    public List<Car> findByCondition(SqlPreparator p) {
+        return obtainResult(p);
     }
     
     @Override
     public List<Car> findAll() {
-        String sql = """
-                     FROM Car car
-                     JOIN FETCH car.model m JOIN FETCH car.model.brand JOIN FETCH car.status s 
-                     """;
-        
-        try (var session = factory.openSession()) {
-            session.beginTransaction();            
-            List<Car> cars = session.createQuery(sql, Car.class).list();
-            cars.forEach(System.out::println);
-            session.getTransaction().commit();
-            return cars;
-        }
+        return obtainResult(SqlPreparator.select().from(cl, "c").joinForCar());
     }
     
     @Override
     public Car findById(int id) {
-        String sql = """
-                     FROM Car c
-                     JOIN FETCH c.model m 
-                     JOIN FETCH m.brand b 
-                     JOIN FETCH c.status s
-                     WHERE c.id = :id
-                     """;
-        
-        try (var session = factory.openSession()) {
-            session.beginTransaction();
-            Car car = session.createQuery(sql, Car.class).setParameter("id", id).getSingleResult();
-            session.getTransaction().commit();
-            return car;
+
+        var p = SqlPreparator.select()
+            .from(cl, "c").joinForCar()
+            .where().eq("c.id", new Integer[]{id}).toMain();
+
+        var res = obtainResult(p);
+        if (!res.isEmpty()) {
+            return res.get(0);
+        } else {
+            throw new NoSuchElementException();
         }
     }
 }
